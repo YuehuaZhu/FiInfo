@@ -15,7 +15,8 @@ log = logging.getLogger(__name__)
 def _make_source(name: str) -> TweetSource:
     if name == "fixture":
         return FixtureTweetSource()
-    return PlaywrightTweetSource(auth_token=get_settings().twitter_auth_token)
+    s = get_settings()
+    return PlaywrightTweetSource(auth_token=s.twitter_auth_token, ct0=s.twitter_ct0)
 
 
 def _upsert_kols(seed: list[Kol]) -> dict[str, int]:
@@ -53,29 +54,38 @@ def collect_all(source_name: str | None = None) -> int:
 
     inserted = 0
     seen = 0
-    with session_scope() as s:
-        existing_ids = {row[0] for row in s.query(Tweet.tweet_id).all()}
-        for k in top:
-            for rt in src.fetch_recent(k.handle, limit=settings.daily_limit_per_category):
-                seen += 1
-                if rt.tweet_id in existing_ids:
-                    continue
-                s.add(
-                    Tweet(
-                        kol_id=handle_to_id[rt.kol_handle],
-                        tweet_id=rt.tweet_id,
-                        url=rt.url,
-                        text=rt.text,
-                        lang=rt.lang,
-                        posted_at=rt.posted_at,
-                        likes=rt.likes,
-                        retweets=rt.retweets,
-                        replies=rt.replies,
-                        category=k.category,
+    try:
+        with session_scope() as s:
+            existing_ids = {row[0] for row in s.query(Tweet.tweet_id).all()}
+            for k in top:
+                for rt in src.fetch_recent(k.handle, limit=settings.daily_limit_per_category):
+                    seen += 1
+                    if rt.tweet_id in existing_ids:
+                        continue
+                    s.add(
+                        Tweet(
+                            kol_id=handle_to_id[rt.kol_handle],
+                            tweet_id=rt.tweet_id,
+                            url=rt.url,
+                            text=rt.text,
+                            lang=rt.lang,
+                            posted_at=rt.posted_at,
+                            likes=rt.likes,
+                            retweets=rt.retweets,
+                            replies=rt.replies,
+                            category=k.category,
+                        )
                     )
-                )
-                existing_ids.add(rt.tweet_id)
-                inserted += 1
+                    existing_ids.add(rt.tweet_id)
+                    inserted += 1
+    finally:
+        # 释放浏览器(Playwright 源会启动 chromium)
+        close = getattr(src, "close", None)
+        if callable(close):
+            try:
+                close()
+            except Exception as e:
+                log.warning("source close failed: %s", e)
     log.info("collected: %d new / %d total seen (%d dedup-skipped)",
              inserted, seen, seen - inserted)
     return inserted

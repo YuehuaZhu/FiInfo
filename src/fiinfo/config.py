@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     # Twitter
     twitter_auth_token: str = Field(default="", validation_alias="TWITTER_AUTH_TOKEN")
+    twitter_ct0: str = Field(default="", validation_alias="TWITTER_CT0")
     twitter_api_bearer: str = Field(default="", validation_alias="TWITTER_API_BEARER")
     twitter_write_consumer_key: str = Field(default="", validation_alias="TWITTER_WRITE_CONSUMER_KEY")
     twitter_write_consumer_secret: str = Field(default="", validation_alias="TWITTER_WRITE_CONSUMER_SECRET")
