@@ -12,13 +12,23 @@ log = logging.getLogger(__name__)
 
 
 def _make_summarizer() -> Summarizer:
+    """优先级:豆包(国内 + 免费额度) → Claude → Echo mock。"""
     settings = get_settings()
-    if settings.has_llm:
+    if settings.has_doubao:
+        try:
+            from fiinfo.summarize.doubao import DoubaoSummarizer
+            log.info("summarizer: Doubao (%s)", settings.ark_model)
+            return DoubaoSummarizer()
+        except Exception as e:
+            log.warning("DoubaoSummarizer init failed (%s); trying Claude next", e)
+    if settings.has_claude:
         try:
             from fiinfo.summarize.claude import ClaudeSummarizer
+            log.info("summarizer: Claude (%s)", settings.anthropic_model)
             return ClaudeSummarizer()
         except Exception as e:
             log.warning("ClaudeSummarizer init failed (%s); falling back to Echo", e)
+    log.info("summarizer: Echo (no LLM credentials)")
     return EchoSummarizer()
 
 
