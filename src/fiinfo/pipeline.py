@@ -10,7 +10,11 @@ from fiinfo.models import SignalRow, TopStory
 from fiinfo.render.briefing import render_today, render_today_from_signals
 from fiinfo.sources.registry import DEFAULT_CONFIG, load_sources, top_stories_config
 from fiinfo.summarize.top_stories import generate_top_stories
-from fiinfo.summarize_orch import summarize_today, summarize_today_from_signals
+from fiinfo.summarize_orch import (
+    summarize_channels_today,
+    summarize_today,
+    summarize_today_from_signals,
+)
 
 log = logging.getLogger(__name__)
 
@@ -73,9 +77,10 @@ def run_daily(
         log.info("pipeline mode: signals (multi-source)")
         n_items = collect_signals()
         n_sum = summarize_today_from_signals(force_mock=force_mock_llm)
+        n_chan = summarize_channels_today(force_mock=force_mock_llm)
         n_top = _maybe_generate_top_stories(force_mock_llm)
         briefing = render_today_from_signals()
-        log.info("top stories generated: %d", n_top)
+        log.info("channel summaries: %d, top stories: %d", n_chan, n_top)
     else:
         log.info("pipeline mode: legacy (tweets only)")
         n_items = collect_all(source_name=source_name)

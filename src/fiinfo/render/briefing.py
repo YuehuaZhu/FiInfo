@@ -164,17 +164,26 @@ def render_today_from_signals(out_dir: Path | None = None, today: str | None = N
         # ─── 按渠道分组 ───
         by_source = _group_by_source(sigs_all)
 
+        # 拉所有渠道摘要(__chan:<kind>)
+        chan_rows = s.query(Summary).filter(
+            Summary.date == today,
+            Summary.category.like("__chan:%"),
+        ).all()
+        chan_md = {row.category[len("__chan:"):]: row.content_md for row in chan_rows}
+
         # 生成每渠道独立页 + 收集导航数据
         sub_dir = out_dir / "by-source"
         sub_dir.mkdir(parents=True, exist_ok=True)
         source_pages: list[dict] = []
         for kind, sigs in by_source.items():
-            page_path = _render_source_page(kind, sigs, sub_dir, today)
+            chan_summary_md = chan_md.get(kind, "")
+            page_path = _render_source_page(kind, sigs, sub_dir, today, chan_summary_md)
             source_pages.append({
                 "kind": kind,
                 "count": len(sigs),
                 "page": f"by-source/{page_path.name}",  # 相对主页
                 "top_preview": [_signal_view(x) for x in sigs[:3]],
+                "teaser": _first_bullet(chan_summary_md),  # 摘要首句给卡片预览
             })
         source_pages.sort(key=lambda x: x["count"], reverse=True)
 
@@ -217,13 +226,31 @@ def _group_by_source(signals) -> dict[str, list]:
     return dict(buckets)
 
 
-def _render_source_page(kind: str, signals: list, sub_dir: Path, today: str) -> Path:
+def _render_source_page(kind: str, signals: list, sub_dir: Path, today: str,
+                        summary_md: str = "") -> Path:
     """生成单个渠道的独立 HTML 页(`by-source/<kind>-YYYY-MM-DD.html`)。"""
     view = [_signal_view(x) for x in signals]
+    summary_html = _md_to_html_basic(summary_md) if summary_md else ""
     html = _env.get_template("source_page.html.j2").render(
         date=today, kind=kind, total=len(signals), signals=view,
+        summary_html=summary_html,
         back_to_index="../briefing-" + today + ".html",
     )
     out = sub_dir / f"{kind}-{today}.html"
     out.write_text(html, encoding="utf-8")
     return out
+
+
+def _first_bullet(md: str, max_len: int = 100) -> str:
+    """从 markdown 摘要里提取第一条要点的文本(去链接和标记),作为卡片预览。"""
+    if not md:
+        return ""
+    for raw in md.splitlines():
+        ln = raw.strip()
+        if not ln.startswith("- "):
+            continue
+        # 去掉链接 [@x](url) → 保留可读文本部分
+        clean = re.sub(r"\[(@?[^\]]+)\]\(([^)]+)\)", "", ln[2:])
+        clean = re.sub(r"\s+", " ", clean).strip()
+        return clean[:max_len] + ("…" if len(clean) > max_len else "")
+    return ""

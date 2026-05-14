@@ -59,6 +59,41 @@ def summarize_today(force_mock: bool = False, today: str | None = None) -> int:
     return count
 
 
+_CHAN_PREFIX = "__chan:"  # Summary.category 用此前缀标识"按渠道"摘要,以区分按类目
+
+
+def summarize_channels_today(force_mock: bool = False, today: str | None = None,
+                              top_per_channel: int = 25) -> int:
+    """按 source_kind 分组,对每个渠道生成中文摘要。
+
+    写入 Summary 表,category 形如 `__chan:twitter`,以避免与按类目摘要冲突。
+    """
+    today = today or dt.date.today().isoformat()
+    summer: Summarizer = EchoSummarizer() if force_mock else _make_summarizer()
+    count = 0
+    with session_scope() as s:
+        # 清旧的渠道摘要
+        s.query(Summary).filter(
+            Summary.date == today,
+            Summary.category.like(f"{_CHAN_PREFIX}%"),
+        ).delete(synchronize_session=False)
+
+        all_signals = s.query(SignalRow).all()
+        # 按 source_kind 分组并按 score 排序
+        buckets: dict[str, list] = {}
+        for sig in all_signals:
+            buckets.setdefault(sig.source_kind, []).append(sig)
+        for kind, sigs in buckets.items():
+            sigs.sort(key=lambda x: x.score, reverse=True)
+            top = sigs[:top_per_channel]
+            md = summer.summarize_category(f"{kind} 渠道", top)
+            ids = ",".join(f"{x.source_kind}:{x.external_id}" for x in top)
+            s.add(Summary(date=today, category=f"{_CHAN_PREFIX}{kind}",
+                          content_md=md, source_signal_ids=ids))
+            count += 1
+    return count
+
+
 def summarize_today_from_signals(force_mock: bool = False, today: str | None = None) -> int:
     """新版:从 signals 表读 + 按 score 排序 + 按类目摘要。
 
@@ -68,7 +103,11 @@ def summarize_today_from_signals(force_mock: bool = False, today: str | None = N
     summer: Summarizer = EchoSummarizer() if force_mock else _make_summarizer()
     count = 0
     with session_scope() as s:
-        s.query(Summary).filter(Summary.date == today).delete()
+        # 只清按类目摘要(不带 __chan: 前缀的),保留渠道摘要不动
+        s.query(Summary).filter(
+            Summary.date == today,
+            ~Summary.category.like(f"{_CHAN_PREFIX}%"),
+        ).delete(synchronize_session=False)
         all_signals = s.query(SignalRow).all()
         settings = get_settings()
         grouped = top_signals_per_category(

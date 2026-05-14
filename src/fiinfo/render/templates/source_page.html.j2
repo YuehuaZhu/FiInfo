@@ -68,6 +68,39 @@ body {
 .src-reddit            { background: color-mix(in srgb, #ff4500 18%, transparent); color: #ff4500; }
 .src-cryptopanic       { background: color-mix(in srgb, #14b8a6 18%, transparent); color: #14b8a6; }
 
+/* ─────────── 摘要区 ─────────── */
+.summary-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--link);
+  border-radius: var(--radius);
+  padding: 1rem 1.2rem;
+  margin: 0 0 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.summary-box .summary-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 .5rem;
+  color: var(--text);
+}
+.summary-content { font-size: .95rem; }
+.summary-content h3 { font-size: 1rem; margin: .8rem 0 .4rem; font-weight: 600; }
+.summary-content ul { padding-left: 1.4rem; margin: .4rem 0; }
+.summary-content li { margin: .35rem 0; }
+.summary-content p { margin: .5rem 0; }
+.summary-content a {
+  color: var(--link); text-decoration: none;
+  border-bottom: 1px dotted color-mix(in srgb, var(--link) 50%, transparent);
+}
+.summary-content a:hover { border-bottom-style: solid; }
+
+.section-head {
+  margin: 2rem 0 .8rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
 .signal-list { display: grid; gap: .7rem; }
 .signal {
   background: var(--bg-card);
@@ -128,6 +161,15 @@ body {
   <h1><span class="kind-badge src-{{ kind }}">{{ kind }}</span></h1>
   <div class="meta">{{ date }} · 共 {{ total }} 条信号</div>
 </header>
+
+{% if summary_html %}
+<section class="summary-box">
+  <div class="summary-title">📝 今日 {{ kind }} 渠道概览</div>
+  <div class="summary-content">{{ summary_html|safe }}</div>
+</section>
+{% endif %}
+
+<div class="section-head">📋 完整信号列表</div>
 
 <div class="signal-list">
 {% for t in signals %}

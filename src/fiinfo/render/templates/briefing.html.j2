@@ -457,9 +457,9 @@ details summary:hover { background: color-mix(in srgb, var(--bg-elevated) 60%, v
         <span class="sc-count">{{ sp.count }}<small>条</small></span>
       </div>
       <div class="sc-preview">
-        {% for p in sp.top_preview %}{% if loop.index > 1 %} · {% endif %}{{ p.title or p.text[:50] }}{% endfor %}
+        {% if sp.teaser %}{{ sp.teaser }}{% else %}{% for p in sp.top_preview %}{% if loop.index > 1 %} · {% endif %}{{ p.title or p.text[:50] }}{% endfor %}{% endif %}
       </div>
-      <div class="sc-cta">查看全部 →</div>
+      <div class="sc-cta">查看完整摘要 + 信号 →</div>
     </a>
     {% endfor %}
   </div>
