@@ -20,5 +20,5 @@ def test_render_produces_html(tmp_path):
     html = out.read_text(encoding="utf-8")
     assert out.suffix == ".html"
     assert "<html" in html.lower()
-    assert "DeFi" in html
-    assert "AIAgent" in html
+    # 至少一个新类目在 HTML 里(fixture 含 RWA / Stablecoin / PerpDEX / Restaking 等关键词)
+    assert any(c in html for c in ("PerpDEX", "Stablecoin", "Restaking", "RWA", "InfraL2"))

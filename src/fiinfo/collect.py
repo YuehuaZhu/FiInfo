@@ -1,5 +1,6 @@
 import logging
 
+from fiinfo.categorize import reclassify
 from fiinfo.config import get_settings
 from fiinfo.db import session_scope
 from fiinfo.kol.ranker import top_n_by_category
@@ -62,6 +63,7 @@ def collect_all(source_name: str | None = None) -> int:
                     seen += 1
                     if rt.tweet_id in existing_ids:
                         continue
+                    cat = reclassify(rt.text, default=k.category)
                     s.add(
                         Tweet(
                             kol_id=handle_to_id[rt.kol_handle],
@@ -73,7 +75,7 @@ def collect_all(source_name: str | None = None) -> int:
                             likes=rt.likes,
                             retweets=rt.retweets,
                             replies=rt.replies,
-                            category=k.category,
+                            category=cat,
                         )
                     )
                     existing_ids.add(rt.tweet_id)

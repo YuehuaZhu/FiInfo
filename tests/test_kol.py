@@ -3,10 +3,12 @@ from fiinfo.kol.seed_loader import load_seed_kols
 from fiinfo.models import Kol
 
 
-def test_seed_loads_at_least_25():
+def test_seed_loads_at_least_80():
     kols = load_seed_kols()
-    assert len(kols) >= 25
-    assert {"DeFi", "AIAgent", "Ecommerce", "Staking"} <= {k.category for k in kols}
+    assert len(kols) >= 80
+    expected = {"PerpDEX", "DEXAMM", "Wallet", "Stablecoin", "RWA",
+                "Prediction", "AIAgent", "Restaking", "InfraL2"}
+    assert expected <= {k.category for k in kols}
 
 
 def _mk(handle, cat, followers):
