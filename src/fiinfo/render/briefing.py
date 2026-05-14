@@ -14,6 +14,25 @@ _env = Environment(loader=FileSystemLoader(_TPL_DIR), autoescape=select_autoesca
 
 _LINK_DOUBLE = re.compile(r"\[\[([^\]]+)\]\]\(([^)]+)\)")   # 旧:[[id]](url)
 _LINK_SINGLE = re.compile(r"\[(@[^\]]+)\]\(([^)]+)\)")       # 新:[@handle](url)
+_ALL_LINKS = re.compile(r"(\[(?:@[^\]]+|\[[^\]]+\])\]\(([^)]+)\))")  # 抓所有引用 + url
+
+
+def _dedup_citations_in_line(ln: str) -> str:
+    """同一行里相同 url 的引用只保留第一次出现。"""
+    seen_urls: set[str] = set()
+
+    def _keep(m: re.Match) -> str:
+        full, url = m.group(1), m.group(2)
+        if url in seen_urls:
+            return ""
+        seen_urls.add(url)
+        return full
+
+    # 折叠引用之间的多余空格
+    cleaned = _ALL_LINKS.sub(_keep, ln)
+    cleaned = re.sub(r"\s+([。,,。;;])", r"\1", cleaned)
+    cleaned = re.sub(r" {2,}", " ", cleaned).rstrip()
+    return cleaned
 
 
 def _md_to_html_basic(md: str) -> str:
@@ -27,6 +46,8 @@ def _md_to_html_basic(md: str) -> str:
                 html_lines.append("</ul>")
                 in_list = False
             continue
+        # 行内 url 去重(防止 LLM 把同一 url 重复引用)
+        ln = _dedup_citations_in_line(ln)
         # 转链接 (两种格式)
         ln_html = _LINK_DOUBLE.sub(r'<a href="\2" target="_blank">[\1]</a>', ln)
         ln_html = _LINK_SINGLE.sub(r'<a href="\2" target="_blank">\1</a>', ln_html)

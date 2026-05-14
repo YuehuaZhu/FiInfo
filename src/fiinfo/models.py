@@ -42,7 +42,8 @@ class Summary(Base):
     date: Mapped[str] = mapped_column(String(10), index=True)
     category: Mapped[str] = mapped_column(String(32))
     content_md: Mapped[str] = mapped_column(Text)
-    source_tweet_ids: Mapped[str] = mapped_column(Text, default="")
+    source_tweet_ids: Mapped[str] = mapped_column(Text, default="")  # 旧版兼容
+    source_signal_ids: Mapped[str] = mapped_column(Text, default="")  # 新版,多源 ids
 
 
 class DispatchLog(Base):
@@ -52,3 +53,27 @@ class DispatchLog(Base):
     channel: Mapped[str] = mapped_column(String(16))
     status: Mapped[str] = mapped_column(String(16))
     payload: Mapped[str] = mapped_column(Text)
+
+
+class SignalRow(Base):
+    """所有源(Twitter / DefiLlama / RSS / Reddit / ...)统一信号表。
+
+    Tweet 表保留兼容老测试,但新流水线主战场是 signals。
+    """
+    __tablename__ = "signals"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_kind: Mapped[str] = mapped_column(String(24), index=True)
+    source_name: Mapped[str] = mapped_column(String(128))
+    external_id: Mapped[str] = mapped_column(String(96), index=True)
+    url: Mapped[str] = mapped_column(String(512))
+    title: Mapped[str] = mapped_column(String(280), default="")
+    text: Mapped[str] = mapped_column(Text)
+    lang: Mapped[str] = mapped_column(String(8), default="en")
+    author_handle: Mapped[str] = mapped_column(String(64), default="")
+    posted_at: Mapped[dt.datetime] = mapped_column(DateTime, index=True)
+    score: Mapped[float] = mapped_column(Float, default=0.0)
+    raw_score_json: Mapped[str] = mapped_column(Text, default="{}")
+    category: Mapped[str] = mapped_column(String(32), default="", index=True)
+    __table_args__ = (
+        UniqueConstraint("source_kind", "external_id", name="uq_signal_kind_extid"),
+    )
