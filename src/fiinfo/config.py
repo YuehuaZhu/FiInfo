@@ -7,20 +7,23 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_prefix="")
 
-    twitter_auth_token: str = ""
-    twitter_api_bearer: str = ""
-    twitter_write_consumer_key: str = ""
-    twitter_write_consumer_secret: str = ""
-    twitter_write_access_token: str = ""
-    twitter_write_access_secret: str = ""
+    # Twitter
+    twitter_auth_token: str = Field(default="", validation_alias="TWITTER_AUTH_TOKEN")
+    twitter_api_bearer: str = Field(default="", validation_alias="TWITTER_API_BEARER")
+    twitter_write_consumer_key: str = Field(default="", validation_alias="TWITTER_WRITE_CONSUMER_KEY")
+    twitter_write_consumer_secret: str = Field(default="", validation_alias="TWITTER_WRITE_CONSUMER_SECRET")
+    twitter_write_access_token: str = Field(default="", validation_alias="TWITTER_WRITE_ACCESS_TOKEN")
+    twitter_write_access_secret: str = Field(default="", validation_alias="TWITTER_WRITE_ACCESS_SECRET")
 
-    anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-4-6"
+    # LLM
+    anthropic_api_key: str = Field(default="", validation_alias="ANTHROPIC_API_KEY")
+    anthropic_model: str = Field(default="claude-sonnet-4-6", validation_alias="ANTHROPIC_MODEL")
 
-    data_dir: Path = Field(default=Path("./data"))
-    tz: str = "Asia/Shanghai"
-    daily_limit_per_category: int = 30
-    top_kol_ratio: float = 0.25
+    # Runtime
+    data_dir: Path = Field(default=Path("./data"), validation_alias="FIINFO_DATA_DIR")
+    tz: str = Field(default="Asia/Shanghai", validation_alias="FIINFO_TZ")
+    daily_limit_per_category: int = Field(default=30, validation_alias="FIINFO_DAILY_LIMIT_PER_CATEGORY")
+    top_kol_ratio: float = Field(default=0.25, validation_alias="FIINFO_TOP_KOL_RATIO")
 
     @property
     def has_twitter_read(self) -> bool:
@@ -41,7 +44,6 @@ class Settings(BaseSettings):
 
 
 def get_settings() -> Settings:
-    """Re-read .env each call so tests with monkeypatch see fresh values."""
     s = Settings()
     s.data_dir.mkdir(parents=True, exist_ok=True)
     return s
