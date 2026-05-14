@@ -26,7 +26,7 @@ sources:
   # ─── 以下为 Phase 9.2-9.12 待实现源,启用前需要先写 impl 类 ───
 
   defillama_tvl:
-    enabled: false
+    enabled: true       # ✅ Phase 9.2
     kind: defillama
     impl: fiinfo.sources.defillama:TVLSource
     cadence: 4h
@@ -43,7 +43,7 @@ sources:
       since_days: 7
 
   defillama_hacks:
-    enabled: false
+    enabled: true       # ✅ Phase 9.4
     kind: defillama
     impl: fiinfo.sources.defillama:HacksSource
     cadence: daily

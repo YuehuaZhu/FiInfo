@@ -85,3 +85,8 @@
 - [ ] 2026-05-14T19:08:31 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
 - [ ] 2026-05-14T19:08:31 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
 - [ ] 2026-05-14T19:08:31 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T19:12:09 — DefiLlama /raises 请求失败: HTTPStatusError: Client error '402 Payment Required' for url 'https://api.llama.fi/raises'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402
+- [ ] 2026-05-14T19:13:40 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
+- [ ] 2026-05-14T19:13:40 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
+- [ ] 2026-05-14T19:13:40 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
