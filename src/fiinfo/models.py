@@ -55,6 +55,18 @@ class DispatchLog(Base):
     payload: Mapped[str] = mapped_column(Text)
 
 
+class TopStory(Base):
+    """LLM 跨源融合产出的当日 Top-N 大事件。"""
+    __tablename__ = "top_stories"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    date: Mapped[str] = mapped_column(String(10), index=True)
+    rank: Mapped[int] = mapped_column(Integer)
+    title: Mapped[str] = mapped_column(String(200))
+    narrative: Mapped[str] = mapped_column(Text)
+    category: Mapped[str] = mapped_column(String(32), default="")
+    sources_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
 class SignalRow(Base):
     """所有源(Twitter / DefiLlama / RSS / Reddit / ...)统一信号表。
 

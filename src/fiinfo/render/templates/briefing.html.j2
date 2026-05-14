@@ -7,29 +7,86 @@
   h2{margin-top:2rem;border-left:4px solid #4a90e2;padding-left:.6rem}
   h3{margin-top:1rem}
   .meta{color:#888;font-size:.9rem}
-  a{color:#1f6feb}
+  a{color:#1f6feb;text-decoration:none}
+  a:hover{text-decoration:underline}
   ul{padding-left:1.2rem}
   details{margin:.4rem 0;padding:.4rem .6rem;background:#f7f7f9;border-radius:4px}
   summary{cursor:pointer;font-weight:600}
   .tweet{margin:.3rem 0 .3rem 1rem;padding:.3rem;border-left:2px solid #ddd}
   .kol{color:#555;font-size:.85rem}
   .footer{margin-top:3rem;color:#aaa;font-size:.8rem;text-align:center}
+  /* Top stories */
+  .top-stories{margin:1.5rem 0;padding:1rem 1.2rem;background:linear-gradient(135deg,#fef9e6 0%,#fff5d6 100%);border-radius:8px;border-left:4px solid #f5a623}
+  .top-stories h2{border:none;padding:0;margin:0 0 1rem 0;color:#7a5800}
+  .story{margin:.7rem 0;padding:.6rem .8rem;background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .story-rank{display:inline-block;width:1.6rem;height:1.6rem;line-height:1.6rem;text-align:center;background:#f5a623;color:#fff;border-radius:50%;font-weight:600;font-size:.85rem;margin-right:.5rem}
+  .story-title{font-weight:600;font-size:1.05rem}
+  .story-cat{display:inline-block;padding:.1rem .5rem;background:#e8f0ff;color:#1f6feb;border-radius:3px;font-size:.75rem;margin-left:.5rem}
+  .story-narrative{margin:.4rem 0 .3rem 0;color:#444}
+  .story-sources{font-size:.8rem;color:#666}
+  .story-sources a{margin-right:.4rem;padding:1px 6px;background:#f0f0f0;border-radius:3px;font-size:.75rem}
+  /* Source kind badges */
+  .src-twitter{color:#1da1f2}
+  .src-defillama_tvl,.src-defillama_hacks{color:#7c3aed}
+  .src-coingecko_trending{color:#8dc647}
+  .src-snapshot{color:#384bff}
+  .src-github_trending{color:#181717}
+  .src-rss{color:#ee802f}
+  /* TOC */
+  .toc{margin:1rem 0;padding:.6rem 1rem;background:#f7f7f9;border-radius:6px;font-size:.9rem}
+  .toc a{margin-right:.6rem}
 </style></head>
 <body>
 <h1>FiInfo 日报 · {{ date }}</h1>
-<p class="meta">共 {{ total_tweets }} 条 KOL 推文 / {{ summaries|length }} 个类目</p>
+<p class="meta">共 {{ total_tweets }} 条信号 / {{ summaries|length }} 个类目{% if top_stories %} / {{ top_stories|length }} 条 Top 大事件{% endif %}</p>
+
+{% if top_stories %}
+<div class="top-stories">
+  <h2>🔥 今日 Top {{ top_stories|length }} 大事件</h2>
+  {% for st in top_stories %}
+  <div class="story">
+    <span class="story-rank">{{ st.rank }}</span>
+    <span class="story-title">{{ st.title }}</span>
+    {% if st.category %}<span class="story-cat">{{ st.category }}</span>{% endif %}
+    <div class="story-narrative">{{ st.narrative }}</div>
+    {% if st.sources %}
+    <div class="story-sources">出处:
+      {% for s in st.sources %}
+      <a href="{{ s.url }}" target="_blank" class="src-{{ s.kind }}">{{ s.kind }} · @{{ s.name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if summaries %}
+<div class="toc">📑 类目导航:
+  {% for cat in summaries.keys() %}
+  <a href="#cat-{{ cat }}">{{ cat or 'uncategorized' }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
 {% for cat, item in summaries.items() %}
-<h2>{{ cat }}</h2>
+<h2 id="cat-{{ cat }}">{{ cat or 'uncategorized' }}</h2>
 <div>{{ item.summary_html|safe }}</div>
-<details><summary>原始推文 ({{ item.tweets|length }})</summary>
+<details><summary>原始信号 ({{ item.tweets|length }})</summary>
 {% for t in item.tweets %}
 <div class="tweet">
-  <div class="kol">@{{ t.kol_handle }} · ❤ {{ t.likes }} · 🔁 {{ t.retweets }}</div>
+  <div class="kol">
+    <span class="src-{{ t.source_kind|default('twitter') }}">@{{ t.kol_handle }}</span>
+    {% if t.likes %} · ❤ {{ t.likes }}{% endif %}
+    {% if t.retweets %} · 🔁 {{ t.retweets }}{% endif %}
+    {% if t.source_kind and t.source_kind != 'twitter' %} · {{ t.source_kind }}{% endif %}
+  </div>
   <div>{{ t.text }}</div>
   <a href="{{ t.url }}" target="_blank">原文链接</a>
 </div>
 {% endfor %}
 </details>
 {% endfor %}
-<div class="footer">FiInfo · 自动生成</div>
+
+<div class="footer">FiInfo · 自动生成 · {{ date }}</div>
 </body></html>

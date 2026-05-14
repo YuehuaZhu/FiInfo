@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from fiinfo.config import get_settings
 from fiinfo.db import session_scope
-from fiinfo.models import Kol, SignalRow, Summary, Tweet
+from fiinfo.models import Kol, SignalRow, Summary, TopStory, Tweet
 
 _TPL_DIR = Path(__file__).parent / "templates"
 _env = Environment(loader=FileSystemLoader(_TPL_DIR), autoescape=select_autoescape(["html"]))
@@ -111,7 +111,7 @@ def render_today(out_dir: Path | None = None, today: str | None = None) -> Path:
         total = len(tweets_all)
 
     html = _env.get_template("briefing.html.j2").render(
-        date=today, total_tweets=total, summaries=by_cat
+        date=today, total_tweets=total, summaries=by_cat, top_stories=[]
     )
     out = out_dir / f"briefing-{today}.html"
     out.write_text(html, encoding="utf-8")
@@ -157,8 +157,24 @@ def render_today_from_signals(out_dir: Path | None = None, today: str | None = N
 
         total = len(sigs_all)
 
+        # Top stories
+        top_rows = s.query(TopStory).filter(TopStory.date == today).order_by(TopStory.rank).all()
+        top_stories = []
+        for ts in top_rows:
+            try:
+                sources = json.loads(ts.sources_json or "[]")
+            except Exception:
+                sources = []
+            top_stories.append({
+                "rank": ts.rank,
+                "title": ts.title,
+                "narrative": ts.narrative,
+                "category": ts.category,
+                "sources": sources,
+            })
+
     html = _env.get_template("briefing.html.j2").render(
-        date=today, total_tweets=total, summaries=by_cat
+        date=today, total_tweets=total, summaries=by_cat, top_stories=top_stories
     )
     out = out_dir / f"briefing-{today}.html"
     out.write_text(html, encoding="utf-8")
