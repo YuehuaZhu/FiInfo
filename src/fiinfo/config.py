@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     # LLM
     anthropic_api_key: str = Field(default="", validation_alias="ANTHROPIC_API_KEY")
+    anthropic_auth_token: str = Field(default="", validation_alias="ANTHROPIC_AUTH_TOKEN")
+    anthropic_base_url: str = Field(default="", validation_alias="ANTHROPIC_BASE_URL")
     anthropic_model: str = Field(default="claude-sonnet-4-6", validation_alias="ANTHROPIC_MODEL")
 
     # Runtime
@@ -41,7 +43,7 @@ class Settings(BaseSettings):
 
     @property
     def has_llm(self) -> bool:
-        return bool(self.anthropic_api_key)
+        return bool(self.anthropic_api_key or self.anthropic_auth_token)
 
 
 def get_settings() -> Settings:

@@ -26,7 +26,15 @@ class ClaudeSummarizer(Summarizer):
         settings = get_settings()
         if client is None:
             from anthropic import Anthropic
-            client = Anthropic(api_key=settings.anthropic_api_key)
+            kwargs: dict = {}
+            # 代理网关:auth_token + base_url(如 sub2api.sineai.cn)
+            if settings.anthropic_auth_token:
+                kwargs["auth_token"] = settings.anthropic_auth_token
+            elif settings.anthropic_api_key:
+                kwargs["api_key"] = settings.anthropic_api_key
+            if settings.anthropic_base_url:
+                kwargs["base_url"] = settings.anthropic_base_url
+            client = Anthropic(**kwargs)
         self.client = client
         self.model = model or settings.anthropic_model
 
