@@ -1,7 +1,7 @@
 import pytest
 
-from fiinfo import db as _db
 from fiinfo import config as _config
+from fiinfo import db as _db
 
 
 @pytest.fixture(autouse=True)

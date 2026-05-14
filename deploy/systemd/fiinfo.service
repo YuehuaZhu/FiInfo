@@ -1,0 +1,13 @@
+[Unit]
+Description=FiInfo daily pipeline
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/fiinfo
+Environment="PATH=/opt/fiinfo/.venv/bin:/usr/bin:/bin"
+EnvironmentFile=/opt/fiinfo/.env
+ExecStart=/opt/fiinfo/.venv/bin/python -m fiinfo.cli daily
+StandardOutput=append:/var/log/fiinfo.log
+StandardError=append:/var/log/fiinfo.log
