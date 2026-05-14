@@ -51,31 +51,33 @@ sources:
       since_days: 14
 
   coingecko_trending:
-    enabled: false
+    enabled: true       # ✅ Phase 9.5
     kind: coingecko
     impl: fiinfo.sources.coingecko:TrendingSource
     cadence: 4h
 
   cryptopanic:
-    enabled: false
+    enabled: false      # Cloudflare 403,免费 RSS 已被关闭。需要 CRYPTOPANIC_TOKEN
     kind: cryptopanic
     impl: fiinfo.sources.cryptopanic:NewsSource
     cadence: 1h
+    require_env: [CRYPTOPANIC_TOKEN]
     params:
       filter: hot
       limit: 50
 
   reddit:
-    enabled: false
+    enabled: false      # 2024 后 Reddit JSON 限免,需要 OAuth。MORNING_TODO 提示用户提供
     kind: reddit
     impl: fiinfo.sources.reddit:HotPostsSource
     cadence: 4h
+    require_env: [REDDIT_CLIENT_ID]
     params:
       subs: [CryptoCurrency, ethfinance, solana, defi]
       limit_per_sub: 15
 
   snapshot:
-    enabled: false
+    enabled: true       # ✅ Phase 9.6
     kind: snapshot
     impl: fiinfo.sources.snapshot:ProposalsSource
     cadence: 4h
@@ -91,13 +93,13 @@ sources:
         - gitcoindao.eth
 
   github_trending:
-    enabled: false
+    enabled: true       # ✅ Phase 9.7
     kind: github
     impl: fiinfo.sources.github_trending:TrendingSource
     cadence: daily
 
   rss_zh:
-    enabled: false
+    enabled: false      # 中文媒体(Foresight/Odaily/ChainCatcher)的 RSS 都已关闭,改 SPA 了
     kind: rss
     impl: fiinfo.sources.rss_feeds:RSSSource
     cadence: 1h
@@ -108,7 +110,7 @@ sources:
         - https://www.odaily.news/feed
 
   rss_en:
-    enabled: false
+    enabled: true       # ✅ Phase 9.8 (Cointelegraph + The Block)
     kind: rss
     impl: fiinfo.sources.rss_feeds:RSSSource
     cadence: 1h
