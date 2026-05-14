@@ -1,14 +1,17 @@
+import json
 import logging
+from pathlib import Path
 
 from fiinfo.categorize import reclassify
 from fiinfo.config import get_settings
 from fiinfo.db import session_scope
 from fiinfo.kol.ranker import top_n_by_category
 from fiinfo.kol.seed_loader import load_seed_kols
-from fiinfo.models import Kol, Tweet
+from fiinfo.models import Kol, SignalRow, Tweet
 from fiinfo.sources.base import TweetSource
 from fiinfo.sources.fixture import FixtureTweetSource
 from fiinfo.sources.playwright_src import PlaywrightTweetSource
+from fiinfo.sources.registry import DEFAULT_CONFIG, load_sources
 
 log = logging.getLogger(__name__)
 
@@ -90,4 +93,63 @@ def collect_all(source_name: str | None = None) -> int:
                 log.warning("source close failed: %s", e)
     log.info("collected: %d new / %d total seen (%d dedup-skipped)",
              inserted, seen, seen - inserted)
+    return inserted
+
+
+def collect_signals(config_path: Path = DEFAULT_CONFIG) -> int:
+    """新版多源采集:registry 加载 enabled sources,每个 source.fetch() → signals 表。
+
+    返回新插入的 signal 数。
+    """
+    sources = load_sources(config_path)
+    if not sources:
+        log.warning("collect_signals: no enabled sources in %s", config_path)
+        return 0
+
+    inserted = 0
+    total = 0
+    with session_scope() as s:
+        existing = {(r.source_kind, r.external_id) for r in s.query(
+            SignalRow.source_kind, SignalRow.external_id).all()}
+        for src in sources:
+            kind = getattr(src, "kind", "?")
+            name = getattr(src, "registry_name", type(src).__name__)
+            try:
+                sigs = src.fetch()
+            except Exception as e:
+                log.warning("source %s (%s) fetch failed: %s", name, kind, e)
+                continue
+            log.info("source %s (%s): %d signals", name, kind, len(sigs))
+            for sig in sigs:
+                total += 1
+                key = (sig.source_kind, sig.external_id)
+                if key in existing:
+                    continue
+                cat = reclassify(sig.text, default=sig.category)
+                s.add(SignalRow(
+                    source_kind=sig.source_kind,
+                    source_name=sig.source_name,
+                    external_id=sig.external_id,
+                    url=sig.url,
+                    title=sig.title or sig.text[:80],
+                    text=sig.text,
+                    lang=sig.lang,
+                    author_handle=sig.author_handle,
+                    posted_at=sig.posted_at,
+                    score=sig.score,
+                    raw_score_json=json.dumps(sig.raw_score, ensure_ascii=False),
+                    category=cat,
+                ))
+                existing.add(key)
+                inserted += 1
+        # 调用源的 close (释放浏览器等)
+        for src in sources:
+            close = getattr(src, "close", None)
+            if callable(close):
+                try:
+                    close()
+                except Exception as e:
+                    log.warning("source close failed: %s", e)
+    log.info("collect_signals: %d new / %d total (%d dup skipped)",
+             inserted, total, total - inserted)
     return inserted

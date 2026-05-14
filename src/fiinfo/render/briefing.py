@@ -14,23 +14,30 @@ _env = Environment(loader=FileSystemLoader(_TPL_DIR), autoescape=select_autoesca
 
 _LINK_DOUBLE = re.compile(r"\[\[([^\]]+)\]\]\(([^)]+)\)")   # 旧:[[id]](url)
 _LINK_SINGLE = re.compile(r"\[(@[^\]]+)\]\(([^)]+)\)")       # 新:[@handle](url)
-_ALL_LINKS = re.compile(r"(\[(?:@[^\]]+|\[[^\]]+\])\]\(([^)]+)\))")  # 抓所有引用 + url
+# 抓所有引用:group(1)=完整,group(2)=显示文本(@handle 或 [id]),group(3)=url
+_ALL_LINKS = re.compile(r"(\[(@[^\]]+|\[[^\]]+\])\]\(([^)]+)\))")
 
 
 def _dedup_citations_in_line(ln: str) -> str:
-    """同一行里相同 url 的引用只保留第一次出现。"""
-    seen_urls: set[str] = set()
+    """同一行里同一作者(@handle)或同一 url 的引用只保留第一次出现。
+
+    用户希望"@saylor @saylor"这种连续重名也不出现 —— 即使 url 不同,
+    同一个 handle 在一条要点里也只显示一次。
+    """
+    seen_keys: set[str] = set()
 
     def _keep(m: re.Match) -> str:
-        full, url = m.group(1), m.group(2)
-        if url in seen_urls:
+        full, label, url = m.group(1), m.group(2), m.group(3)
+        # 用 handle(label)作 key,如果是旧 [[id]] 格式则用 url 作 key
+        key = label if label.startswith("@") else url
+        if key in seen_keys:
             return ""
-        seen_urls.add(url)
+        seen_keys.add(key)
         return full
 
-    # 折叠引用之间的多余空格
     cleaned = _ALL_LINKS.sub(_keep, ln)
-    cleaned = re.sub(r"\s+([。,,。;;])", r"\1", cleaned)
+    # 折叠引用之间的多余空格 / 标点前空格
+    cleaned = re.sub(r"\s+([。,，。;;])", r"\1", cleaned)
     cleaned = re.sub(r" {2,}", " ", cleaned).rstrip()
     return cleaned
 

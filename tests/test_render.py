@@ -24,15 +24,24 @@ def test_render_produces_html(tmp_path):
     assert any(c in html for c in ("PerpDEX", "Stablecoin", "Restaking", "RWA", "InfraL2"))
 
 
-def test_dedup_citations():
+def test_dedup_same_url():
     from fiinfo.render.briefing import _dedup_citations_in_line
     line = "- Saylor 观点 [@saylor](https://x.com/saylor/status/1) [@saylor](https://x.com/saylor/status/1)"
     out = _dedup_citations_in_line(line)
     assert out.count("https://x.com/saylor/status/1") == 1
 
 
-def test_dedup_preserves_different_urls():
+def test_dedup_same_handle_different_urls():
+    """同作者多 url 也只保留第一条,避免 @saylor @saylor 重复显示。"""
     from fiinfo.render.briefing import _dedup_citations_in_line
-    line = "- [@saylor](https://x.com/saylor/status/1) [@saylor](https://x.com/saylor/status/2)"
+    line = "- 比特币观点 [@saylor](https://x.com/saylor/status/1) [@saylor](https://x.com/saylor/status/2)"
     out = _dedup_citations_in_line(line)
-    assert "status/1" in out and "status/2" in out
+    assert out.count("@saylor") == 1
+    assert "status/1" in out  # 第一个保留
+
+
+def test_dedup_preserves_different_handles():
+    from fiinfo.render.briefing import _dedup_citations_in_line
+    line = "- 跨人观点 [@saylor](https://x.com/saylor/status/1) [@cz_binance](https://x.com/cz_binance/status/2)"
+    out = _dedup_citations_in_line(line)
+    assert "@saylor" in out and "@cz_binance" in out

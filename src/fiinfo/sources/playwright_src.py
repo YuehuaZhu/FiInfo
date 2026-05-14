@@ -16,6 +16,7 @@ import time
 
 from fiinfo.morning_todo import add as todo_add
 from fiinfo.sources.base import RawTweet, TweetSource
+from fiinfo.sources.base_signal import Signal
 
 log = logging.getLogger(__name__)
 
@@ -208,3 +209,69 @@ class PlaywrightTweetSource(TweetSource):
         except Exception as e:
             log.debug("parse article failed: %s", e)
             return None
+
+
+def _engagement_score(likes: int, retweets: int, replies: int) -> float:
+    """归一化 Twitter 互动分到 0-100。
+    1k 互动 ~50 分,10k ~75 分,100k+ ~ 100 分。
+    """
+    import math
+    raw = likes + retweets * 2 + replies
+    if raw <= 0:
+        return 0.0
+    return min(100.0, 12.5 * math.log10(raw + 10))
+
+
+class PlaywrightSignalSource:
+    """SignalSource 适配:wrap PlaywrightTweetSource,产出 Signal。
+
+    依赖 KOL seed + ranker,内部聚合多个 KOL 的推文。
+    """
+
+    def __init__(self, top_kol_ratio: float | None = None,
+                 daily_limit_per_category: int | None = None,
+                 delay_min_s: float = 5.0, delay_max_s: float = 10.0):
+        from fiinfo.config import get_settings
+        s = get_settings()
+        self.top_kol_ratio = top_kol_ratio if top_kol_ratio is not None else s.top_kol_ratio
+        self.limit_per_kol = daily_limit_per_category or s.daily_limit_per_category
+        self._inner = PlaywrightTweetSource(
+            auth_token=s.twitter_auth_token, ct0=s.twitter_ct0,
+        )
+        # 把延迟参数透传(便于配置文件控制)
+        # 注:PlaywrightTweetSource 当前用硬编码 5-10s,这里参数留以备未来扩展
+
+    def close(self):
+        self._inner.close()
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
+
+    def fetch(self) -> list[Signal]:
+        from fiinfo.kol.ranker import top_n_by_category
+        from fiinfo.kol.seed_loader import load_seed_kols
+
+        seed = load_seed_kols()
+        top = top_n_by_category(seed, ratio=self.top_kol_ratio)
+        out: list[Signal] = []
+        for k in top:
+            raws = self._inner.fetch_recent(k.handle, limit=self.limit_per_kol)
+            for rt in raws:
+                out.append(Signal(
+                    source_kind="twitter",
+                    source_name=k.handle,
+                    external_id=rt.tweet_id,
+                    url=rt.url,
+                    title=rt.text[:80].replace("\n", " "),
+                    text=rt.text,
+                    posted_at=rt.posted_at,
+                    score=_engagement_score(rt.likes, rt.retweets, rt.replies),
+                    raw_score={"likes": rt.likes, "retweets": rt.retweets, "replies": rt.replies},
+                    category=k.category,
+                    lang=rt.lang,
+                    author_handle=k.handle,
+                ))
+        return out
