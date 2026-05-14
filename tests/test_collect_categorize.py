@@ -23,7 +23,7 @@ def _t(cat, likes, tid):
         url="",
         text="x",
         lang="en",
-        posted_at=dt.datetime.utcnow(),
+        posted_at=dt.datetime.now(dt.UTC),
         likes=likes,
         retweets=0,
         replies=0,

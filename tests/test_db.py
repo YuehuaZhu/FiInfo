@@ -17,7 +17,7 @@ def test_can_insert_and_query():
                 url="https://x.com/v/1",
                 text="hello",
                 lang="en",
-                posted_at=dt.datetime.utcnow(),
+                posted_at=dt.datetime.now(dt.UTC),
                 likes=10,
                 retweets=2,
                 replies=1,

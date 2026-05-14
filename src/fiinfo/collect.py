@@ -52,10 +52,12 @@ def collect_all(source_name: str | None = None) -> int:
     handle_to_id = _upsert_kols(seed)
 
     inserted = 0
+    seen = 0
     with session_scope() as s:
         existing_ids = {row[0] for row in s.query(Tweet.tweet_id).all()}
         for k in top:
             for rt in src.fetch_recent(k.handle, limit=settings.daily_limit_per_category):
+                seen += 1
                 if rt.tweet_id in existing_ids:
                     continue
                 s.add(
@@ -74,5 +76,6 @@ def collect_all(source_name: str | None = None) -> int:
                 )
                 existing_ids.add(rt.tweet_id)
                 inserted += 1
-    log.info("inserted %d tweets", inserted)
+    log.info("collected: %d new / %d total seen (%d dedup-skipped)",
+             inserted, seen, seen - inserted)
     return inserted

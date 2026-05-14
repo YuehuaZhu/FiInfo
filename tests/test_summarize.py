@@ -15,7 +15,7 @@ def _t(text, tid):
         url=f"https://x.com/u/{tid}",
         text=text,
         lang="en",
-        posted_at=dt.datetime.utcnow(),
+        posted_at=dt.datetime.now(dt.UTC),
         likes=10,
         retweets=1,
         replies=0,

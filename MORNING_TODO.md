@@ -25,3 +25,5 @@
 
 - [ ] 2026-05-14 跑 `pytest` 多次触发 `PlaywrightTweetSource` 构造,均因 no cookie 落入 TODO
 - [ ] 2026-05-14T08:06:59 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T11:39:19 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T11:42:12 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
