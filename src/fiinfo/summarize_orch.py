@@ -12,8 +12,15 @@ log = logging.getLogger(__name__)
 
 
 def _make_summarizer() -> Summarizer:
-    """优先级:豆包(国内 + 免费额度) → Claude → Echo mock。"""
+    """优先级:千问(阿里) → 豆包(火山方舟) → Claude → Echo mock。"""
     settings = get_settings()
+    if settings.has_qwen:
+        try:
+            from fiinfo.summarize.qwen import QwenSummarizer
+            log.info("summarizer: Qwen (%s)", settings.dashscope_model)
+            return QwenSummarizer()
+        except Exception as e:
+            log.warning("QwenSummarizer init failed (%s); trying Doubao next", e)
     if settings.has_doubao:
         try:
             from fiinfo.summarize.doubao import DoubaoSummarizer

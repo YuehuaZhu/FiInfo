@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     )
     ark_model: str = Field(default="doubao-pro-32k", validation_alias="ARK_MODEL")
 
+    # LLM — 千问(阿里 DashScope,OpenAI 兼容)
+    dashscope_api_key: str = Field(default="", validation_alias="DASHSCOPE_API_KEY")
+    dashscope_base_url: str = Field(
+        default="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        validation_alias="DASHSCOPE_BASE_URL",
+    )
+    dashscope_model: str = Field(default="qwen-max", validation_alias="DASHSCOPE_MODEL")
+
     # Runtime
     data_dir: Path = Field(default=Path("./data"), validation_alias="FIINFO_DATA_DIR")
     tz: str = Field(default="Asia/Shanghai", validation_alias="FIINFO_TZ")
@@ -50,6 +58,10 @@ class Settings(BaseSettings):
         ])
 
     @property
+    def has_qwen(self) -> bool:
+        return bool(self.dashscope_api_key)
+
+    @property
     def has_doubao(self) -> bool:
         return bool(self.ark_api_key)
 
@@ -59,7 +71,7 @@ class Settings(BaseSettings):
 
     @property
     def has_llm(self) -> bool:
-        return self.has_doubao or self.has_claude
+        return self.has_qwen or self.has_doubao or self.has_claude
 
 
 def get_settings() -> Settings:

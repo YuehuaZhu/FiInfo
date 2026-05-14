@@ -37,3 +37,4 @@
 
 - [ ] 2026-05-14 豆包接入代码已就位,但 agora-v4 上 jack/tom/alice 两个 ARK key 都 AccountOverdue(403),需要你提供一个充值过的 ARK_API_KEY 或自己开个新账号(火山方舟控制台领 200 万 token/天免费额度)
 - [ ] 2026-05-14T16:59:07 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T17:01:00 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
