@@ -128,3 +128,6 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 - [ ] 2026-05-14T21:06:34 — CoinGecko trending 请求失败: ConnectTimeout: _ssl.c:993: The handshake operation timed out
 - [ ] 2026-05-14T21:06:49 — Reddit /r/CryptoCurrency 失败: ConnectTimeout
 - [ ] 2026-05-14T21:07:04 — Reddit /r/ethfinance 失败: ConnectTimeout
+- [ ] 2026-05-14T21:46:49 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
+- [ ] 2026-05-14T21:46:49 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
+- [ ] 2026-05-14T21:46:49 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取

@@ -1,92 +1,443 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8">
-<title>FiInfo 简报 {{ date }}</title>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FiInfo · {{ date }}</title>
 <style>
-  body{font-family:-apple-system,Segoe UI,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#222;line-height:1.6}
-  h1{border-bottom:2px solid #333;padding-bottom:.4rem}
-  h2{margin-top:2rem;border-left:4px solid #4a90e2;padding-left:.6rem}
-  h3{margin-top:1rem}
-  .meta{color:#888;font-size:.9rem}
-  a{color:#1f6feb;text-decoration:none}
-  a:hover{text-decoration:underline}
-  ul{padding-left:1.2rem}
-  details{margin:.4rem 0;padding:.4rem .6rem;background:#f7f7f9;border-radius:4px}
-  summary{cursor:pointer;font-weight:600}
-  .tweet{margin:.3rem 0 .3rem 1rem;padding:.3rem;border-left:2px solid #ddd}
-  .kol{color:#555;font-size:.85rem}
-  .footer{margin-top:3rem;color:#aaa;font-size:.8rem;text-align:center}
-  /* Top stories */
-  .top-stories{margin:1.5rem 0;padding:1rem 1.2rem;background:linear-gradient(135deg,#fef9e6 0%,#fff5d6 100%);border-radius:8px;border-left:4px solid #f5a623}
-  .top-stories h2{border:none;padding:0;margin:0 0 1rem 0;color:#7a5800}
-  .story{margin:.7rem 0;padding:.6rem .8rem;background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-  .story-rank{display:inline-block;width:1.6rem;height:1.6rem;line-height:1.6rem;text-align:center;background:#f5a623;color:#fff;border-radius:50%;font-weight:600;font-size:.85rem;margin-right:.5rem}
-  .story-title{font-weight:600;font-size:1.05rem}
-  .story-cat{display:inline-block;padding:.1rem .5rem;background:#e8f0ff;color:#1f6feb;border-radius:3px;font-size:.75rem;margin-left:.5rem}
-  .story-narrative{margin:.4rem 0 .3rem 0;color:#444}
-  .story-sources{font-size:.8rem;color:#666}
-  .story-sources a{margin-right:.4rem;padding:1px 6px;background:#f0f0f0;border-radius:3px;font-size:.75rem}
-  /* Source kind badges */
-  .src-twitter{color:#1da1f2}
-  .src-defillama_tvl,.src-defillama_hacks{color:#7c3aed}
-  .src-coingecko_trending{color:#8dc647}
-  .src-snapshot{color:#384bff}
-  .src-github_trending{color:#181717}
-  .src-rss{color:#ee802f}
-  /* TOC */
-  .toc{margin:1rem 0;padding:.6rem 1rem;background:#f7f7f9;border-radius:6px;font-size:.9rem}
-  .toc a{margin-right:.6rem}
-</style></head>
+/* ─────────── 设计令牌 (CSS variables for light/dark) ─────────── */
+:root {
+  --bg: #fafafa;
+  --bg-card: #ffffff;
+  --bg-elevated: #f4f5f7;
+  --bg-accent: linear-gradient(135deg, #fef9e6 0%, #fff5d6 100%);
+  --text: #1a1a1a;
+  --text-secondary: #555;
+  --text-muted: #888;
+  --border: #e6e6e8;
+  --border-strong: #2b2d31;
+  --link: #1f6feb;
+  --link-hover: #0f5fdb;
+  --accent: #f5a623;
+  --accent-fg: #7a5800;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04), 0 1px 4px rgba(0,0,0,.04);
+  --shadow-md: 0 2px 6px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.05);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1116;
+    --bg-card: #161b22;
+    --bg-elevated: #1c222b;
+    --bg-accent: linear-gradient(135deg, #2a230f 0%, #3a2d12 100%);
+    --text: #e6edf3;
+    --text-secondary: #9fa9b8;
+    --text-muted: #6e7681;
+    --border: #2b313a;
+    --border-strong: #c9d1d9;
+    --link: #58a6ff;
+    --link-hover: #79b8ff;
+    --accent: #d29922;
+    --accent-fg: #f5cd8a;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+    --shadow-md: 0 2px 8px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.25);
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+               "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.2rem 5rem; }
+
+/* ─────────── 顶部 hero ─────────── */
+.hero {
+  padding: 2rem 0 1.2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin: 0 0 .4rem;
+  letter-spacing: -.02em;
+  font-weight: 700;
+}
+.hero .stat {
+  color: var(--text-muted);
+  font-size: .92rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem .8rem;
+}
+.hero .stat .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  background: var(--bg-elevated);
+  padding: .2rem .6rem;
+  border-radius: 100px;
+  font-size: .82rem;
+}
+
+/* ─────────── 粘性 TOC ─────────── */
+.toc {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  margin: 1rem -.4rem;
+  padding: .6rem .4rem;
+  border-bottom: 1px solid var(--border);
+  font-size: .85rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+}
+.toc a {
+  display: inline-block;
+  margin-right: .4rem;
+  padding: .25rem .7rem;
+  border-radius: 100px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  transition: all .15s;
+}
+.toc a:hover {
+  color: var(--link);
+  border-color: var(--link);
+  background: color-mix(in srgb, var(--link) 8%, transparent);
+}
+
+/* ─────────── Top stories 区 ─────────── */
+.top-stories {
+  margin: 1.5rem 0 2rem;
+  padding: 1.4rem 1.4rem 1rem;
+  background: var(--bg-accent);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--accent);
+  box-shadow: var(--shadow-md);
+}
+.top-stories h2 {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+  color: var(--accent-fg);
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.story {
+  margin: .8rem 0;
+  padding: .9rem 1rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+.story-head {
+  display: flex;
+  align-items: baseline;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+.story-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  padding: 0 .5rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: .85rem;
+  flex-shrink: 0;
+}
+.story-title {
+  font-weight: 600;
+  font-size: 1.02rem;
+  flex: 1;
+  min-width: 0;
+}
+.story-cat {
+  display: inline-block;
+  padding: .12rem .55rem;
+  background: color-mix(in srgb, var(--link) 15%, transparent);
+  color: var(--link);
+  border-radius: 4px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.story-narrative {
+  margin: .5rem 0 .5rem 2.3rem;
+  color: var(--text-secondary);
+  font-size: .94rem;
+}
+.story-sources {
+  margin-left: 2.3rem;
+  font-size: .78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  align-items: center;
+}
+.story-sources .label { margin-right: .2rem; }
+
+/* 源徽章 — 各 source_kind 一种颜色 */
+.src {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  padding: .14rem .55rem;
+  border-radius: 4px;
+  font-size: .73rem;
+  text-decoration: none;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+.src-twitter           { background: color-mix(in srgb, #1da1f2 12%, transparent); color: #1da1f2; }
+.src-defillama_tvl     { background: color-mix(in srgb, #7c3aed 12%, transparent); color: #7c3aed; }
+.src-defillama_hacks   { background: color-mix(in srgb, #ef4444 12%, transparent); color: #ef4444; }
+.src-defillama_raises  { background: color-mix(in srgb, #10b981 12%, transparent); color: #10b981; }
+.src-coingecko_trending{ background: color-mix(in srgb, #8dc647 12%, transparent); color: #6da636; }
+.src-snapshot          { background: color-mix(in srgb, #384bff 12%, transparent); color: #384bff; }
+.src-github_trending   { background: color-mix(in srgb, #6e7681 18%, transparent); color: var(--text); }
+.src-rss               { background: color-mix(in srgb, #ee802f 12%, transparent); color: #d96f1c; }
+.src-reddit            { background: color-mix(in srgb, #ff4500 12%, transparent); color: #ff4500; }
+.src-cryptopanic       { background: color-mix(in srgb, #14b8a6 12%, transparent); color: #14b8a6; }
+
+/* ─────────── 类目区 ─────────── */
+.category {
+  margin: 2.2rem 0;
+  scroll-margin-top: 4rem; /* sticky TOC offset */
+}
+.cat-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-left: 4px solid var(--link);
+  padding: .1rem .8rem;
+  margin-bottom: .8rem;
+}
+.cat-head h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.cat-head .count {
+  font-size: .8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.summary {
+  padding: 0 .2rem;
+  font-size: .96rem;
+}
+.summary h3 { font-size: 1rem; margin: .8rem 0 .4rem; font-weight: 600; }
+.summary ul { padding-left: 1.4rem; margin: .4rem 0; }
+.summary li { margin: .35rem 0; }
+.summary p { margin: .5rem 0; }
+.summary a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px dotted color-mix(in srgb, var(--link) 50%, transparent);
+}
+.summary a:hover { color: var(--link-hover); border-bottom-style: solid; }
+
+/* ─────────── 原始信号(details)─────────── */
+details {
+  margin: .8rem .2rem;
+  padding: 0;
+  background: transparent;
+  border-radius: var(--radius-sm);
+}
+details summary {
+  list-style: none;
+  cursor: pointer;
+  padding: .55rem .9rem;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  font-size: .85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  user-select: none;
+  border: 1px solid var(--border);
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: .4rem;
+  transition: transform .15s;
+}
+details[open] summary::before { transform: rotate(90deg); }
+details summary:hover { background: color-mix(in srgb, var(--bg-elevated) 60%, var(--link) 8%); }
+
+.signal-list {
+  margin: .5rem .2rem 0;
+  display: grid;
+  gap: .5rem;
+}
+.signal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .65rem .85rem;
+  font-size: .9rem;
+  box-shadow: var(--shadow-sm);
+}
+.signal-meta {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-bottom: .3rem;
+  flex-wrap: wrap;
+}
+.signal-meta .author { font-weight: 600; color: var(--text-secondary); }
+.signal-text {
+  color: var(--text);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.signal-link {
+  margin-top: .35rem;
+  font-size: .78rem;
+}
+.signal-link a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.signal-link a:hover { color: var(--link); }
+
+/* ─────────── footer ─────────── */
+.footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .8rem;
+}
+
+/* ─────────── 移动端响应式 ─────────── */
+@media (max-width: 640px) {
+  .wrap { padding: 1rem .9rem 4rem; }
+  .hero { padding: 1.2rem 0 1rem; }
+  .top-stories { padding: 1rem 1rem .8rem; }
+  .story { padding: .75rem .8rem; }
+  .story-narrative, .story-sources { margin-left: 0; }
+  .story-head { margin-bottom: .3rem; }
+  .toc { margin: .6rem -.9rem; padding: .5rem .9rem; }
+  .signal { padding: .55rem .7rem; }
+  .cat-head h2 { font-size: 1.15rem; }
+}
+
+/* ─────────── 打印样式 ─────────── */
+@media print {
+  .toc, details summary { display: none; }
+  details { display: block; }
+  details > * { display: block !important; }
+  body { background: white; color: black; }
+  .top-stories { background: #fff8e0; box-shadow: none; }
+}
+</style>
+</head>
 <body>
-<h1>FiInfo 日报 · {{ date }}</h1>
-<p class="meta">共 {{ total_tweets }} 条信号 / {{ summaries|length }} 个类目{% if top_stories %} / {{ top_stories|length }} 条 Top 大事件{% endif %}</p>
+<div class="wrap">
+
+<header class="hero">
+  <h1>FiInfo 日报 · {{ date }}</h1>
+  <div class="stat">
+    <span class="pill">📊 {{ total_tweets }} 条信号</span>
+    <span class="pill">📂 {{ summaries|length }} 个类目</span>
+    {% if top_stories %}<span class="pill">🔥 {{ top_stories|length }} 条 Top 事件</span>{% endif %}
+  </div>
+</header>
+
+{% if top_stories or summaries %}
+<nav class="toc">
+  {% if top_stories %}<a href="#top-stories">🔥 Top</a>{% endif %}
+  {% for cat in summaries.keys() %}
+  <a href="#cat-{{ cat or 'uncategorized' }}">{{ cat or 'uncategorized' }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
 
 {% if top_stories %}
-<div class="top-stories">
+<section class="top-stories" id="top-stories">
   <h2>🔥 今日 Top {{ top_stories|length }} 大事件</h2>
   {% for st in top_stories %}
-  <div class="story">
-    <span class="story-rank">{{ st.rank }}</span>
-    <span class="story-title">{{ st.title }}</span>
-    {% if st.category %}<span class="story-cat">{{ st.category }}</span>{% endif %}
-    <div class="story-narrative">{{ st.narrative }}</div>
+  <article class="story">
+    <div class="story-head">
+      <span class="story-rank">{{ st.rank }}</span>
+      <span class="story-title">{{ st.title }}</span>
+      {% if st.category %}<span class="story-cat">{{ st.category }}</span>{% endif %}
+    </div>
+    {% if st.narrative %}<div class="story-narrative">{{ st.narrative }}</div>{% endif %}
     {% if st.sources %}
-    <div class="story-sources">出处:
+    <div class="story-sources">
+      <span class="label">出处</span>
       {% for s in st.sources %}
-      <a href="{{ s.url }}" target="_blank" class="src-{{ s.kind }}">{{ s.kind }} · @{{ s.name }}</a>
+      <a href="{{ s.url }}" target="_blank" rel="noopener" class="src src-{{ s.kind }}">{{ s.kind }} · @{{ s.name }}</a>
       {% endfor %}
     </div>
     {% endif %}
-  </div>
+  </article>
   {% endfor %}
-</div>
-{% endif %}
-
-{% if summaries %}
-<div class="toc">📑 类目导航:
-  {% for cat in summaries.keys() %}
-  <a href="#cat-{{ cat }}">{{ cat or 'uncategorized' }}</a>
-  {% endfor %}
-</div>
+</section>
 {% endif %}
 
 {% for cat, item in summaries.items() %}
-<h2 id="cat-{{ cat }}">{{ cat or 'uncategorized' }}</h2>
-<div>{{ item.summary_html|safe }}</div>
-<details><summary>原始信号 ({{ item.tweets|length }})</summary>
-{% for t in item.tweets %}
-<div class="tweet">
-  <div class="kol">
-    <span class="src-{{ t.source_kind|default('twitter') }}">@{{ t.kol_handle }}</span>
-    {% if t.likes %} · ❤ {{ t.likes }}{% endif %}
-    {% if t.retweets %} · 🔁 {{ t.retweets }}{% endif %}
-    {% if t.source_kind and t.source_kind != 'twitter' %} · {{ t.source_kind }}{% endif %}
+<section class="category" id="cat-{{ cat or 'uncategorized' }}">
+  <div class="cat-head">
+    <h2>{{ cat or 'uncategorized' }}</h2>
+    <span class="count">{{ item.tweets|length }} 条原始信号</span>
   </div>
-  <div>{{ t.text }}</div>
-  <a href="{{ t.url }}" target="_blank">原文链接</a>
-</div>
-{% endfor %}
-</details>
+  <div class="summary">{{ item.summary_html|safe }}</div>
+  {% if item.tweets %}
+  <details>
+    <summary>查看 {{ item.tweets|length }} 条原始信号</summary>
+    <div class="signal-list">
+      {% for t in item.tweets %}
+      <div class="signal">
+        <div class="signal-meta">
+          <span class="src src-{{ t.source_kind|default('twitter') }}">{{ t.source_kind|default('twitter') }}</span>
+          <span class="author">@{{ t.kol_handle }}</span>
+          {% if t.likes %}<span>❤ {{ t.likes }}</span>{% endif %}
+          {% if t.retweets %}<span>🔁 {{ t.retweets }}</span>{% endif %}
+        </div>
+        <div class="signal-text">{{ t.text }}</div>
+        <div class="signal-link"><a href="{{ t.url }}" target="_blank" rel="noopener">原文 ↗</a></div>
+      </div>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+</section>
 {% endfor %}
 
-<div class="footer">FiInfo · 自动生成 · {{ date }}</div>
-</body></html>
+<footer class="footer">
+  FiInfo · 自动生成 · {{ date }} · <a href="https://github.com/YuehuaZhu/FiInfo" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+</div>
+</body>
+</html>
