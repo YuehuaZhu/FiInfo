@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>FiInfo 简报 {{ date }}</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#222;line-height:1.6}
+  h1{border-bottom:2px solid #333;padding-bottom:.4rem}
+  h2{margin-top:2rem;border-left:4px solid #4a90e2;padding-left:.6rem}
+  h3{margin-top:1rem}
+  .meta{color:#888;font-size:.9rem}
+  a{color:#1f6feb}
+  ul{padding-left:1.2rem}
+  details{margin:.4rem 0;padding:.4rem .6rem;background:#f7f7f9;border-radius:4px}
+  summary{cursor:pointer;font-weight:600}
+  .tweet{margin:.3rem 0 .3rem 1rem;padding:.3rem;border-left:2px solid #ddd}
+  .kol{color:#555;font-size:.85rem}
+  .footer{margin-top:3rem;color:#aaa;font-size:.8rem;text-align:center}
+</style></head>
+<body>
+<h1>FiInfo 日报 · {{ date }}</h1>
+<p class="meta">共 {{ total_tweets }} 条 KOL 推文 / {{ summaries|length }} 个类目</p>
+{% for cat, item in summaries.items() %}
+<h2>{{ cat }}</h2>
+<div>{{ item.summary_html|safe }}</div>
+<details><summary>原始推文 ({{ item.tweets|length }})</summary>
+{% for t in item.tweets %}
+<div class="tweet">
+  <div class="kol">@{{ t.kol_handle }} · ❤ {{ t.likes }} · 🔁 {{ t.retweets }}</div>
+  <div>{{ t.text }}</div>
+  <a href="{{ t.url }}" target="_blank">原文链接</a>
+</div>
+{% endfor %}
+</details>
+{% endfor %}
+<div class="footer">FiInfo · 自动生成</div>
+</body></html>
