@@ -90,3 +90,19 @@ def top_per_category(tweets: list[Tweet], limit_per_cat: int = 30) -> dict[str, 
         c: sorted(items, key=engagement_score, reverse=True)[:limit_per_cat]
         for c, items in buckets.items()
     }
+
+
+def signal_score(s) -> float:
+    """读 SignalRow.score(已归一化 0-100),用于 signals 表排序。"""
+    return float(getattr(s, "score", 0.0) or 0.0)
+
+
+def top_signals_per_category(signals, limit_per_cat: int = 30) -> dict[str, list]:
+    """SignalRow 版本:按 category 分组,按 score 降序取 top。"""
+    buckets: dict[str, list] = defaultdict(list)
+    for s in signals:
+        buckets[s.category or "uncategorized"].append(s)
+    return {
+        c: sorted(items, key=signal_score, reverse=True)[:limit_per_cat]
+        for c, items in buckets.items()
+    }

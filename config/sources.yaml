@@ -1,15 +1,15 @@
 # FiInfo 信息渠道开关配置
 # 改一行 enabled: false 即可禁用某个源,无需改代码
+# 当前 Phase 9.1 只接了 Twitter,9.2-9.12 会陆续启用下面其他源
 
 defaults:
-  enabled: true
-  cadence: daily        # daily / 4h / 1h / 5m,目前作为 metadata,实际由 scheduler 决定
+  enabled: false        # 默认全关,显式 enabled: true 才生效
+  cadence: daily
   limit: 30
 
 sources:
-  # === Twitter KOL(已有 Playwright) ===
   twitter:
-    enabled: true
+    enabled: true       # ✅ 已实现
     kind: twitter
     impl: fiinfo.sources.playwright_src:PlaywrightSignalSource
     cadence: daily
@@ -18,50 +18,46 @@ sources:
       delay_min_s: 5
       delay_max_s: 10
 
-  # === Twitter Fixture(测试用) ===
   twitter_fixture:
-    enabled: false      # 默认关,跑 make daily 时不要走 mock
+    enabled: false      # 测试用,跑真实流程时关
     kind: twitter
     impl: fiinfo.sources.fixture:FixtureSignalSource
 
-  # === DefiLlama TVL ===
+  # ─── 以下为 Phase 9.2-9.12 待实现源,启用前需要先写 impl 类 ───
+
   defillama_tvl:
-    enabled: true
+    enabled: false
     kind: defillama
     impl: fiinfo.sources.defillama:TVLSource
     cadence: 4h
     params:
       top_n: 30
-      min_change_pct: 3       # 24h 涨跌幅绝对值 < 3% 不收
+      min_change_pct: 3
 
-  # === DefiLlama Raises(融资) ===
   defillama_raises:
-    enabled: true
+    enabled: false
     kind: defillama
     impl: fiinfo.sources.defillama:RaisesSource
     cadence: daily
     params:
       since_days: 7
 
-  # === DefiLlama Hacks(安全事件) ===
   defillama_hacks:
-    enabled: true
+    enabled: false
     kind: defillama
     impl: fiinfo.sources.defillama:HacksSource
     cadence: daily
     params:
       since_days: 14
 
-  # === CoinGecko Trending ===
   coingecko_trending:
-    enabled: true
+    enabled: false
     kind: coingecko
     impl: fiinfo.sources.coingecko:TrendingSource
     cadence: 4h
 
-  # === CryptoPanic 新闻聚合 ===
   cryptopanic:
-    enabled: true
+    enabled: false
     kind: cryptopanic
     impl: fiinfo.sources.cryptopanic:NewsSource
     cadence: 1h
@@ -69,9 +65,8 @@ sources:
       filter: hot
       limit: 50
 
-  # === Reddit 多 sub 热帖 ===
   reddit:
-    enabled: true
+    enabled: false
     kind: reddit
     impl: fiinfo.sources.reddit:HotPostsSource
     cadence: 4h
@@ -79,9 +74,8 @@ sources:
       subs: [CryptoCurrency, ethfinance, solana, defi]
       limit_per_sub: 15
 
-  # === Snapshot 治理提案 ===
   snapshot:
-    enabled: true
+    enabled: false
     kind: snapshot
     impl: fiinfo.sources.snapshot:ProposalsSource
     cadence: 4h
@@ -96,16 +90,14 @@ sources:
         - balancer.eth
         - gitcoindao.eth
 
-  # === GitHub Trending(每日) ===
   github_trending:
-    enabled: true
+    enabled: false
     kind: github
     impl: fiinfo.sources.github_trending:TrendingSource
     cadence: daily
 
-  # === 中文 RSS ===
   rss_zh:
-    enabled: true
+    enabled: false
     kind: rss
     impl: fiinfo.sources.rss_feeds:RSSSource
     cadence: 1h
@@ -115,9 +107,8 @@ sources:
         - https://www.chaincatcher.com/feed.xml
         - https://www.odaily.news/feed
 
-  # === 英文 RSS ===
   rss_en:
-    enabled: true
+    enabled: false
     kind: rss
     impl: fiinfo.sources.rss_feeds:RSSSource
     cadence: 1h
@@ -126,16 +117,14 @@ sources:
         - https://www.theblock.co/rss.xml
         - https://cointelegraph.com/rss
 
-  # === TokenUnlocks ===
   tokenunlocks:
-    enabled: false      # 第三方 API 不稳定,先关
+    enabled: false
     kind: tokenunlocks
     impl: fiinfo.sources.tokenunlocks:UnlocksSource
     cadence: daily
 
-  # === Etherscan 大额转账(可选) ===
   etherscan_whales:
-    enabled: false      # 需要 ETHERSCAN_KEY 才能开
+    enabled: false
     kind: etherscan
     impl: fiinfo.sources.etherscan:WhaleTransferSource
     cadence: 1h
@@ -143,6 +132,6 @@ sources:
 
 # === 全局开关 ===
 top_stories:
-  enabled: true         # 是否在 HTML 顶部生成 LLM 融合的 Top-10 stories
+  enabled: true
   count: 10
-  llm: auto             # auto = 用工厂选定的(qwen/doubao/claude)
+  llm: auto

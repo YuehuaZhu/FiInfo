@@ -19,17 +19,25 @@ _PROMPT = """你是 Web3 资讯编辑。下面是 {category} 类目今日 KOL �
 """
 
 
-def _handle_of(t: Tweet) -> str:
-    """安全获取 KOL handle。Tweet 与 Kol 在同一 session 内关联时可用。"""
+def _handle_of(t) -> str:
+    """获取作者 handle —— 同时支持 Tweet(via kol relationship)和 SignalRow(via author_handle)。"""
+    # SignalRow / Signal: 直接有 author_handle
+    h = getattr(t, "author_handle", None)
+    if h:
+        return h
+    # Tweet: 走 ORM relationship
     try:
-        return t.kol.handle if t.kol else "unknown"
+        kol = getattr(t, "kol", None)
+        if kol is not None:
+            return kol.handle
     except Exception:
-        return "unknown"
+        pass
+    return "unknown"
 
 
-def _format_items(tweets: list[Tweet]) -> str:
+def _format_items(items) -> str:
     return "\n".join(
-        f"- @{_handle_of(t)} | {t.url} | {t.text}" for t in tweets
+        f"- @{_handle_of(t)} | {t.url} | {t.text}" for t in items
     )
 
 

@@ -1,4 +1,5 @@
 import datetime as dt
+import json
 import re
 from pathlib import Path
 
@@ -6,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from fiinfo.config import get_settings
 from fiinfo.db import session_scope
-from fiinfo.models import Kol, Summary, Tweet
+from fiinfo.models import Kol, SignalRow, Summary, Tweet
 
 _TPL_DIR = Path(__file__).parent / "templates"
 _env = Environment(loader=FileSystemLoader(_TPL_DIR), autoescape=select_autoescape(["html"]))
@@ -108,6 +109,53 @@ def render_today(out_dir: Path | None = None, today: str | None = None) -> Path:
             by_cat[sm.category] = {"summary_html": _md_to_html_basic(sm.content_md), "tweets": view}
 
         total = len(tweets_all)
+
+    html = _env.get_template("briefing.html.j2").render(
+        date=today, total_tweets=total, summaries=by_cat
+    )
+    out = out_dir / f"briefing-{today}.html"
+    out.write_text(html, encoding="utf-8")
+    return out
+
+
+def render_today_from_signals(out_dir: Path | None = None, today: str | None = None) -> Path:
+    """新版渲染:读 signals 表(支持多源混排)。
+
+    与 render_today 并存(legacy 通过 tweets)。模板复用同一个 briefing.html.j2,
+    每条 signal 用 author_handle 替代原 KOL 查找。
+    """
+    settings = get_settings()
+    today = today or dt.date.today().isoformat()
+    out_dir = out_dir or settings.data_dir
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    with session_scope() as s:
+        summaries = s.query(Summary).filter(Summary.date == today).all()
+        sigs_all = s.query(SignalRow).all()
+        sigs_by_key = {f"{x.source_kind}:{x.external_id}": x for x in sigs_all}
+
+        by_cat: dict[str, dict] = {}
+        for sm in summaries:
+            keys = [k for k in (sm.source_signal_ids.split(",") if sm.source_signal_ids else []) if k]
+            picked = [sigs_by_key[k] for k in keys if k in sigs_by_key]
+            picked.sort(key=lambda x: x.score, reverse=True)
+            view = []
+            for x in picked:
+                try:
+                    raw = json.loads(x.raw_score_json or "{}")
+                except Exception:
+                    raw = {}
+                view.append({
+                    "kol_handle": x.author_handle or x.source_name,
+                    "text": x.text,
+                    "url": x.url,
+                    "likes": int(raw.get("likes", 0)),
+                    "retweets": int(raw.get("retweets", 0)),
+                    "source_kind": x.source_kind,
+                })
+            by_cat[sm.category] = {"summary_html": _md_to_html_basic(sm.content_md), "tweets": view}
+
+        total = len(sigs_all)
 
     html = _env.get_template("briefing.html.j2").render(
         date=today, total_tweets=total, summaries=by_cat

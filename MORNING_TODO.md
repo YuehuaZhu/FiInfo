@@ -53,3 +53,35 @@
 - [ ] 2026-05-14T17:45:36 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
 - [ ] 2026-05-14T17:45:36 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
 - [ ] 2026-05-14T17:45:36 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T17:49:05 — 启用源 twitter 需配置 env: TWITTER_AUTH_TOKEN
+- [ ] 2026-05-14T17:49:05 — 源 defillama_tvl 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.defillama'
+- [ ] 2026-05-14T17:49:05 — 源 defillama_raises 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.defillama'
+- [ ] 2026-05-14T17:49:05 — 源 defillama_hacks 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.defillama'
+- [ ] 2026-05-14T17:49:05 — 源 coingecko_trending 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.coingecko'
+- [ ] 2026-05-14T17:49:05 — 源 cryptopanic 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.cryptopanic'
+- [ ] 2026-05-14T17:49:05 — 源 reddit 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.reddit'
+- [ ] 2026-05-14T17:49:05 — 源 snapshot 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.snapshot'
+- [ ] 2026-05-14T17:49:05 — 源 github_trending 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.github_trending'
+- [ ] 2026-05-14T17:49:05 — 源 rss_zh 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.rss_feeds'
+- [ ] 2026-05-14T17:49:05 — 源 rss_en 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.rss_feeds'
+- [ ] 2026-05-14T17:49:06 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
+- [ ] 2026-05-14T17:49:06 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
+- [ ] 2026-05-14T17:49:06 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T17:49:23 — 启用源 twitter 需配置 env: TWITTER_AUTH_TOKEN
+- [ ] 2026-05-14T17:49:23 — 源 defillama_tvl 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.defillama'
+- [ ] 2026-05-14T17:49:23 — 源 defillama_raises 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.defillama'
+- [ ] 2026-05-14T17:49:23 — 源 defillama_hacks 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.defillama'
+- [ ] 2026-05-14T17:49:23 — 源 coingecko_trending 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.coingecko'
+- [ ] 2026-05-14T17:49:23 — 源 cryptopanic 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.cryptopanic'
+- [ ] 2026-05-14T17:49:23 — 源 reddit 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.reddit'
+- [ ] 2026-05-14T17:49:23 — 源 snapshot 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.snapshot'
+- [ ] 2026-05-14T17:49:23 — 源 github_trending 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.github_trending'
+- [ ] 2026-05-14T17:49:23 — 源 rss_zh 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.rss_feeds'
+- [ ] 2026-05-14T17:49:23 — 源 rss_en 加载失败: ModuleNotFoundError: No module named 'fiinfo.sources.rss_feeds'
+- [ ] 2026-05-14T17:49:23 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
+- [ ] 2026-05-14T17:49:23 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
+- [ ] 2026-05-14T17:49:23 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T17:50:02 — 启用源 twitter 需配置 env: TWITTER_AUTH_TOKEN
+- [ ] 2026-05-14T19:08:31 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
+- [ ] 2026-05-14T19:08:31 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
+- [ ] 2026-05-14T19:08:31 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取

@@ -8,12 +8,16 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from dotenv import load_dotenv
 
 from fiinfo.morning_todo import add as todo_add
 
 log = logging.getLogger(__name__)
 
 DEFAULT_CONFIG = Path("config/sources.yaml")
+
+# 把 .env 加载到 os.environ,这样 require_env 检查 os.getenv 才能拿到值
+load_dotenv()
 
 
 def _import(spec: str):
