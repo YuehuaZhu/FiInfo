@@ -1,6 +1,8 @@
 import datetime as dt
 import logging
 
+from sqlalchemy.orm import joinedload
+
 from fiinfo.categorize import top_per_category
 from fiinfo.config import get_settings
 from fiinfo.db import session_scope
@@ -46,7 +48,7 @@ def summarize_today(force_mock: bool = False, today: str | None = None) -> int:
     with session_scope() as s:
         # 清掉今天已有的摘要,避免重跑重复
         s.query(Summary).filter(Summary.date == today).delete()
-        all_tweets = s.query(Tweet).all()
+        all_tweets = s.query(Tweet).options(joinedload(Tweet.kol)).all()
         settings = get_settings()
         grouped = top_per_category(all_tweets, limit_per_cat=settings.daily_limit_per_category)
         for cat, tweets in grouped.items():

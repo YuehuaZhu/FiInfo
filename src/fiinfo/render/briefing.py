@@ -12,7 +12,8 @@ _TPL_DIR = Path(__file__).parent / "templates"
 _env = Environment(loader=FileSystemLoader(_TPL_DIR), autoescape=select_autoescape(["html"]))
 
 
-_LINK = re.compile(r"\[\[([^\]]+)\]\]\(([^)]+)\)")
+_LINK_DOUBLE = re.compile(r"\[\[([^\]]+)\]\]\(([^)]+)\)")   # 旧:[[id]](url)
+_LINK_SINGLE = re.compile(r"\[(@[^\]]+)\]\(([^)]+)\)")       # 新:[@handle](url)
 
 
 def _md_to_html_basic(md: str) -> str:
@@ -26,8 +27,9 @@ def _md_to_html_basic(md: str) -> str:
                 html_lines.append("</ul>")
                 in_list = False
             continue
-        # 转链接
-        ln_html = _LINK.sub(r'<a href="\2" target="_blank">[\1]</a>', ln)
+        # 转链接 (两种格式)
+        ln_html = _LINK_DOUBLE.sub(r'<a href="\2" target="_blank">[\1]</a>', ln)
+        ln_html = _LINK_SINGLE.sub(r'<a href="\2" target="_blank">\1</a>', ln_html)
         if ln.startswith("## "):
             if in_list:
                 html_lines.append("</ul>")
