@@ -220,6 +220,70 @@ body {
 .src-reddit            { background: color-mix(in srgb, #ff4500 12%, transparent); color: #ff4500; }
 .src-cryptopanic       { background: color-mix(in srgb, #14b8a6 12%, transparent); color: #14b8a6; }
 
+/* ─────────── 各渠道概览(grid 卡片) ─────────── */
+.sources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: .8rem;
+  margin: 1rem 0 2rem;
+}
+.source-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .9rem 1rem;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  transition: all .15s;
+}
+.source-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--link) 40%, var(--border));
+}
+.source-card .sc-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.source-card .sc-kind {
+  padding: .2rem .55rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: .78rem;
+}
+.source-card .sc-count {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+.source-card .sc-count small { font-weight: 400; color: var(--text-muted); font-size: .72rem; margin-left: .2rem; }
+.source-card .sc-preview {
+  font-size: .82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.source-card .sc-cta {
+  font-size: .78rem;
+  color: var(--link);
+  margin-top: auto;
+}
+.section-head {
+  margin: 2rem 0 .8rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
 /* ─────────── 类目区 ─────────── */
 .category {
   margin: 2.2rem 0;
@@ -372,13 +436,34 @@ details summary:hover { background: color-mix(in srgb, var(--bg-elevated) 60%, v
   </div>
 </header>
 
-{% if top_stories or summaries %}
+{% if top_stories or summaries or source_pages %}
 <nav class="toc">
   {% if top_stories %}<a href="#top-stories">🔥 Top</a>{% endif %}
+  {% if source_pages %}<a href="#sources">📡 渠道</a>{% endif %}
   {% for cat in summaries.keys() %}
   <a href="#cat-{{ cat or 'uncategorized' }}">{{ cat or 'uncategorized' }}</a>
   {% endfor %}
 </nav>
+{% endif %}
+
+{% if source_pages %}
+<section id="sources">
+  <div class="section-head">📡 各渠道热点(点卡片看完整列表)</div>
+  <div class="sources-grid">
+    {% for sp in source_pages %}
+    <a class="source-card" href="{{ sp.page }}">
+      <div class="sc-head">
+        <span class="sc-kind src-{{ sp.kind }}">{{ sp.kind }}</span>
+        <span class="sc-count">{{ sp.count }}<small>条</small></span>
+      </div>
+      <div class="sc-preview">
+        {% for p in sp.top_preview %}{% if loop.index > 1 %} · {% endif %}{{ p.title or p.text[:50] }}{% endfor %}
+      </div>
+      <div class="sc-cta">查看全部 →</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
 {% endif %}
 
 {% if top_stories %}

@@ -111,7 +111,8 @@ def render_today(out_dir: Path | None = None, today: str | None = None) -> Path:
         total = len(tweets_all)
 
     html = _env.get_template("briefing.html.j2").render(
-        date=today, total_tweets=total, summaries=by_cat, top_stories=[]
+        date=today, total_tweets=total, summaries=by_cat, top_stories=[],
+        source_pages=[],
     )
     out = out_dir / f"briefing-{today}.html"
     out.write_text(html, encoding="utf-8")
@@ -139,20 +140,7 @@ def render_today_from_signals(out_dir: Path | None = None, today: str | None = N
             keys = [k for k in (sm.source_signal_ids.split(",") if sm.source_signal_ids else []) if k]
             picked = [sigs_by_key[k] for k in keys if k in sigs_by_key]
             picked.sort(key=lambda x: x.score, reverse=True)
-            view = []
-            for x in picked:
-                try:
-                    raw = json.loads(x.raw_score_json or "{}")
-                except Exception:
-                    raw = {}
-                view.append({
-                    "kol_handle": x.author_handle or x.source_name,
-                    "text": x.text,
-                    "url": x.url,
-                    "likes": int(raw.get("likes", 0)),
-                    "retweets": int(raw.get("retweets", 0)),
-                    "source_kind": x.source_kind,
-                })
+            view = [_signal_view(x) for x in picked]
             by_cat[sm.category] = {"summary_html": _md_to_html_basic(sm.content_md), "tweets": view}
 
         total = len(sigs_all)
@@ -173,9 +161,69 @@ def render_today_from_signals(out_dir: Path | None = None, today: str | None = N
                 "sources": sources,
             })
 
+        # ─── 按渠道分组 ───
+        by_source = _group_by_source(sigs_all)
+
+        # 生成每渠道独立页 + 收集导航数据
+        sub_dir = out_dir / "by-source"
+        sub_dir.mkdir(parents=True, exist_ok=True)
+        source_pages: list[dict] = []
+        for kind, sigs in by_source.items():
+            page_path = _render_source_page(kind, sigs, sub_dir, today)
+            source_pages.append({
+                "kind": kind,
+                "count": len(sigs),
+                "page": f"by-source/{page_path.name}",  # 相对主页
+                "top_preview": [_signal_view(x) for x in sigs[:3]],
+            })
+        source_pages.sort(key=lambda x: x["count"], reverse=True)
+
     html = _env.get_template("briefing.html.j2").render(
-        date=today, total_tweets=total, summaries=by_cat, top_stories=top_stories
+        date=today, total_tweets=total, summaries=by_cat, top_stories=top_stories,
+        source_pages=source_pages,
     )
     out = out_dir / f"briefing-{today}.html"
+    out.write_text(html, encoding="utf-8")
+    return out
+
+
+def _signal_view(x) -> dict:
+    """SignalRow → 模板用 dict。"""
+    try:
+        raw = json.loads(x.raw_score_json or "{}")
+    except Exception:
+        raw = {}
+    return {
+        "kol_handle": x.author_handle or x.source_name,
+        "text": x.text,
+        "url": x.url,
+        "likes": int(raw.get("likes", 0)),
+        "retweets": int(raw.get("retweets", 0)),
+        "source_kind": x.source_kind,
+        "title": x.title,
+        "score": x.score,
+        "posted_at": x.posted_at.isoformat() if x.posted_at else "",
+    }
+
+
+def _group_by_source(signals) -> dict[str, list]:
+    """按 source_kind 分组,每组内按 score 倒序。"""
+    from collections import defaultdict
+    buckets: dict[str, list] = defaultdict(list)
+    for s in signals:
+        buckets[s.source_kind].append(s)
+    for k in buckets:
+        buckets[k].sort(key=lambda x: x.score, reverse=True)
+    return dict(buckets)
+
+
+def _render_source_page(kind: str, signals: list, sub_dir: Path, today: str) -> Path:
+    """生成单个渠道的独立 HTML 页(`by-source/<kind>-YYYY-MM-DD.html`)。"""
+    view = [_signal_view(x) for x in signals]
+    html = _env.get_template("source_page.html.j2").render(
+        date=today, kind=kind, total=len(signals), signals=view,
+        back_to_index="../briefing-" + today + ".html",
+    )
+    out = sub_dir / f"{kind}-{today}.html"
     out.write_text(html, encoding="utf-8")
     return out

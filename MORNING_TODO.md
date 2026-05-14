@@ -131,3 +131,6 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 - [ ] 2026-05-14T21:46:49 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
 - [ ] 2026-05-14T21:46:49 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
 - [ ] 2026-05-14T21:46:49 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T21:53:21 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
+- [ ] 2026-05-14T21:53:21 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
+- [ ] 2026-05-14T21:53:21 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
