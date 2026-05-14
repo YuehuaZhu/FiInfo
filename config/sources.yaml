@@ -67,13 +67,12 @@ sources:
       limit: 50
 
   reddit:
-    enabled: false      # 2024 后 Reddit JSON 限免,需要 OAuth。MORNING_TODO 提示用户提供
+    enabled: true       # ✅ Phase 9.9 (走 .rss atom feed,免认证)
     kind: reddit
     impl: fiinfo.sources.reddit:HotPostsSource
     cadence: 4h
-    require_env: [REDDIT_CLIENT_ID]
     params:
-      subs: [CryptoCurrency, ethfinance, solana, defi]
+      subs: [CryptoCurrency, ethfinance, ethereum, solana, defi]
       limit_per_sub: 15
 
   snapshot:
@@ -99,18 +98,18 @@ sources:
     cadence: daily
 
   rss_zh:
-    enabled: false      # 中文媒体(Foresight/Odaily/ChainCatcher)的 RSS 都已关闭,改 SPA 了
+    enabled: false      # 已探测:foresightnews/odaily/chaincatcher/8btc/jinse/panews 都关 RSS 改 SPA
+                        # RSSHub 公共实例 (rsshub.app) 也 403。等用户提供:
+                        # (a) Telegram channel id + bot token,或
+                        # (b) 自建 RSSHub 实例 url
     kind: rss
     impl: fiinfo.sources.rss_feeds:RSSSource
     cadence: 1h
     params:
-      feeds:
-        - https://foresightnews.pro/feed
-        - https://www.chaincatcher.com/feed.xml
-        - https://www.odaily.news/feed
+      feeds: []
 
   rss_en:
-    enabled: true       # ✅ Phase 9.8 (Cointelegraph + The Block)
+    enabled: true       # ✅ Phase 9.8 + 9.10 (6 个英文媒体 RSS)
     kind: rss
     impl: fiinfo.sources.rss_feeds:RSSSource
     cadence: 1h
@@ -118,6 +117,10 @@ sources:
       feeds:
         - https://www.theblock.co/rss.xml
         - https://cointelegraph.com/rss
+        - https://decrypt.co/feed
+        - https://www.coindesk.com/arc/outboundfeeds/rss/
+        - https://www.dlnews.com/arc/outboundfeeds/rss/
+        - https://bitcoinist.com/feed/
 
   tokenunlocks:
     enabled: false

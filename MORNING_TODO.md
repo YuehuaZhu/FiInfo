@@ -103,3 +103,28 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 - [ ] 2026-05-14T20:03:38 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
 - [ ] 2026-05-14T20:03:38 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
 - [ ] 2026-05-14T20:03:38 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+
+## 2026-05-14 Phase 9 继续推进未完成项 - 探测结果
+
+### 已自动启用(本轮新增)
+- ✅ Reddit:用 `.rss` atom feed 走通(JSON 端点 2024 后封禁),5 个 sub × 15 帖
+- ✅ 英文 RSS 扩充到 6 个源:CoinTelegraph / The Block / Decrypt / CoinDesk / DL News / Bitcoinist
+
+### 探测后确认拿不到,等用户介入
+- ❌ **中文 RSS** - foresightnews/odaily/chaincatcher/8btc/jinse/panews/theblockbeats 全关 RSS 改 SPA;RSSHub 公共实例 (rsshub.app) 403
+  - **解决方案 A**:你提供一个自建 RSSHub URL(GitHub: DIYgod/RSSHub,自部署 docker 一键起)
+  - **解决方案 B**:你提供 Telegram 频道 ID + bot token,系统转 Telegram 公开频道为信号源
+  - **解决方案 C**:接受英文为主,放弃中文 RSS
+- ❌ **TokenUnlocks** - 公开 API 改私有(tokenomist.ai 重定向到 SPA),DefiLlama emissions 也付费了
+  - 等待出现新的公开 unlock 日历 API,或用户付费(~$30/月 Token Terminal)
+- ❌ **CryptoPanic** - Cloudflare 403。需要 `CRYPTOPANIC_TOKEN`(免费 100/day, https://cryptopanic.com/developers/api/)
+- ❌ **DefiLlama Raises** - 转付费 Pro API(~$300/月)
+- ❌ **Etherscan Whales** - 需要 `ETHERSCAN_KEY`(免费 5 req/s, https://etherscan.io/myapikey)
+- [ ] 2026-05-14T20:52:40 — 启用源 needs_key 需配置 env: NEVER_SET_THIS
+- [ ] 2026-05-14T20:52:40 — 源 broken 加载失败: ModuleNotFoundError: No module named 'fiinfo.nonexistent'
+- [ ] 2026-05-14T20:52:40 — 配置 TWITTER_AUTH_TOKEN(浏览器 cookie auth_token)以启用真实抓取
+- [ ] 2026-05-14T21:05:44 — DefiLlama /protocols 请求失败: ConnectTimeout: _ssl.c:993: The handshake operation timed out
+- [ ] 2026-05-14T21:06:14 — DefiLlama /hacks 请求失败: ConnectTimeout: _ssl.c:993: The handshake operation timed out
+- [ ] 2026-05-14T21:06:34 — CoinGecko trending 请求失败: ConnectTimeout: _ssl.c:993: The handshake operation timed out
+- [ ] 2026-05-14T21:06:49 — Reddit /r/CryptoCurrency 失败: ConnectTimeout
+- [ ] 2026-05-14T21:07:04 — Reddit /r/ethfinance 失败: ConnectTimeout
